@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Theme Chat App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #E5DDD5;
+            margin: 0% 20%;
+            height: 100vh;
+        }
+
+        .chat-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .chat-container {
+            background-color: white;
+            border-radius: 5px;
+            overflow-y: auto;
+            height: 400px;
+            padding: 10px;
+        }
+
+        .message {
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            max-width: 80%;
+            clear: both;
+            font-size: 16px;
+            animation: fade-in 0.5s ease;
+        }
+
+        .own-message {
+            background-color: #DCF8C6;
+            margin-left: auto;
+            text-align: right;
+            width: fit-content;
+        }
+
+        .bot-message {
+            background-color: #ECECEC;
+            width: fit-content;
+        }
+
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
+        #red{
+            color: red;
+        }
+        #green{
+            color: green;
+        }
+        p{
+            padding-top: 10px;
+        }
+        small{
+            padding-top: 10px;
+        }
+    </style>
+</head>
+
+<body onload="checkForUserName()">
+    <!-- Header -->
+    <div class="chat-header">
+        Chat Bot By Nishmal Vadakara
+    </div>
+
+    <!-- Chat Section -->
+    <div class="chat-container mb-3" id="chat-container">
+        <!-- Messages will be appended here -->
+    </div>
+
+    <!-- Message Input -->
+    <div class="d-flex">
+        <input type="text" class="form-control mr-2 me-2" id="message-input" onkeyup="handleKeyPress(event)" placeholder="Type your message...">
+        <button class="btn btn-success" onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Modal for Disclaimer and Name Entry -->
+    <div id="disclaimerModal" class="modal">
+        <div class="modal-content">
+            
+            <h2>Welcome!</h2>
+            <p>Please enter your name for a personalized experience. No registration needed.</p>
+            <div><input type="text" id="userName" placeholder="Your Name">
+                <button onclick="saveUserName()">Continue</button></div>
+            <small><span id="green">Creator: </span>Nishmal Vadakara ( Mern Stack Developer @ Self-Stack , Calicut)</small>
+            <small><span id="red">Disclaimer: </span> Chat history is not collected here. This is for demonstration purposes only.
+            </small>
+        </div>
+    </div>
+    <div style="margin-top: 30px; text-align: center;">
+        
+    
+    <p>&copy; 2023 Developed by Nishmal Vadakara 
+        <a aria-label="Star Its-me-nishmal on GitHub" data-count-aria-label="# stargazers on GitHub" data-count-href="/Its-me-nishmal/chatbot" data-icon="octicon-star" href="https://github.com/Its-me-nishmal/chatbot" target="_blank" class="github-button">Star</a>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+        
+    </p>
+    </div>
+    
+
+    <script>
+        function checkForUserName() {
+            const userName = getCookie('userName');
+            if (!userName) {
+                // Show the disclaimer modal
+                const modal = document.getElementById('disclaimerModal');
+                modal.style.display = 'block';
+            }
+        }
+
+        function saveUserName() {
+            const userNameInput = document.getElementById('userName');
+            const userName = userNameInput.value;
+            if (userName) {
+                setCookie('userName', userName, 30);
+                const modal = document.getElementById('disclaimerModal');
+                modal.style.display = 'none';
+            } else {
+                alert('Please enter your name to continue.');
+            }
+        }
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        async function sendMessage() {
+            const messageBox = document.getElementById('message-input');
+            const message = messageBox.value;
+            if (!message.trim()) return;
+
+            // Append User's Message
+            appendMessage(message, true);
+
+
+            const url = `https://api.allorigins.win/raw?url=${encodeURIComponent('http://api.brainshop.ai/get?bid=178439&key=KREbwvqnFG4WnFTG&uid=123&msg=' + message)}`;
+
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+                // Append Bot's Response
+                if (data && data.cnt) {
+                    appendMessage(data.cnt, false);
+                } else {
+                    appendMessage('Error getting response.', false);
+                }
+            } catch (error) {
+                appendMessage('Error fetching response.', false);
+            }
+
+            // Clear input
+            messageBox.value = '';
+        }
+
+        function sendToTelegramBot(message) {
+            const userName = getCookie('userName') || 'Unknown';
+            const text = `${userName}: ${message}`;
+            const url = `https://api.telegram.org/bot6213478436:AAGKU_DQCdSle2swRuF9RKaxfaIfhCV7bM0/sendMessage?chat_id=@bot_chats_by_nishmal&text=${encodeURIComponent(text)}`;
+            fetch(url);
+        }
+
+        function appendMessage(message, isOwn) {
+            sendToTelegramBot(message)
+            const chatContainer = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isOwn ? 'own-message' : 'bot-message');
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+
+            // Animate the message
+            setTimeout(() => {
+                messageDiv.style.opacity = 1;
+            }, 0);
+
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to the bottom
+        
+        }
+        function handleKeyPress(event) {
+        if (event.keyCode === 13) {
+            sendMessage(); // Call sendMessage function when Enter is pressed
+        }
+    }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>
